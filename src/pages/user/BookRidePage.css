@@ -1,0 +1,155 @@
+/* src/pages/user/BookRidePage.css */
+.book-ride-page {
+  min-height: calc(100vh - 80px);
+  background-color: #f8fafc;
+  padding: 40px 0;
+}
+
+.page-title {
+  font-size: 2rem;
+  color: #1e293b;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.book-ride-card {
+  background-color: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ride-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-input {
+  padding: 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ride-type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.ride-type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.ride-type-option:hover {
+  border-color: #3b82f6;
+}
+
+.ride-type-option.selected {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.ride-type-option input[type="radio"] {
+  display: none;
+}
+
+.ride-type-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.ride-type-option span {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 5px;
+}
+
+.ride-type-option small {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.fare-estimate {
+  background-color: #f8fafc;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  border: 2px dashed #cbd5e1;
+}
+
+.fare-estimate h3 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.fare-estimate p {
+  color: #64748b;
+}
+
+.book-btn {
+  padding: 18px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.book-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+@media (max-width: 768px) {
+  .book-ride-card {
+    padding: 25px;
+  }
+  
+  .ride-type-selector {
+    grid-template-columns: 1fr;
+  }
+}
