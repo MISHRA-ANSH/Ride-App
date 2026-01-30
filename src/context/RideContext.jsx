@@ -421,7 +421,6 @@ export const RideProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use ride context
 export const useRides = () => {
   const context = useContext(RideContext);
   if (!context) {

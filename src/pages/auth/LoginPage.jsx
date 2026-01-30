@@ -1,11 +1,12 @@
 // src/pages/auth/LoginPage.jsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FaEnvelope, 
-  FaLock, 
-  FaUser, 
-  FaTaxi, 
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import {
+  FaEnvelope,
+  FaLock,
+  FaUser,
+  FaTaxi,
   FaShieldAlt,
   FaSignInAlt,
   FaArrowLeft,
@@ -16,15 +17,18 @@ import { useAuth } from '../../context/AuthContext';
 import './LoginPage.css';
 
 const LoginPage = () => {
+  const [searchParams] = useSearchParams();
+  const userTypeFromUrl = searchParams.get('type') || 'user';
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    userType: 'user'
+    userType: userTypeFromUrl
   });
-  
+
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -39,32 +43,42 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields');
+      toast.error('Please fill in all fields');
       return;
     }
-    
+
     setIsLoading(true);
     setError('');
-    
+
     try {
       const result = await login(formData.email, formData.password, formData.userType);
-      
+
       if (result.success) {
-        // Redirect based on user type
-        if (result.userType === 'user') {
-          navigate('/user/dashboard');
-        } else if (result.userType === 'driver') {
-          navigate('/driver/dashboard');
-        } else if (result.userType === 'admin') {
-          navigate('/admin/dashboard');
-        }
+        toast.success(`🎉 Welcome back! Logging in as ${result.userType}...`, {
+          position: "top-center",
+          autoClose: 2000,
+        });
+
+        // Redirect based on user type after a short delay
+        setTimeout(() => {
+          if (result.userType === 'user') {
+            navigate('/user/dashboard');
+          } else if (result.userType === 'driver') {
+            navigate('/driver/dashboard');
+          } else if (result.userType === 'admin') {
+            navigate('/admin/dashboard');
+          }
+        }, 1000);
       } else {
         setError(result.error || 'Login failed. Please try again.');
+        toast.error(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
+      toast.error('An unexpected error occurred. Please try again.');
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -72,7 +86,7 @@ const LoginPage = () => {
   };
 
   const getUserTypeIcon = (type) => {
-    switch(type) {
+    switch (type) {
       case 'user': return <FaUser />;
       case 'driver': return <FaTaxi />;
       case 'admin': return <FaShieldAlt />;
@@ -83,8 +97,8 @@ const LoginPage = () => {
   // Demo credentials for quick login
   const handleDemoLogin = (type) => {
     let credentials = {};
-    
-    switch(type) {
+
+    switch (type) {
       case 'user':
         credentials = { email: 'rahul@example.com', password: 'password123' };
         break;
@@ -95,7 +109,7 @@ const LoginPage = () => {
         credentials = { email: 'admin@ridebook.com', password: 'admin123' };
         break;
     }
-    
+
     setFormData({
       email: credentials.email,
       password: credentials.password,
@@ -112,31 +126,31 @@ const LoginPage = () => {
               <div className="loading-spinner"></div>
             </div>
           )}
-          
+
           <div className="login-header">
             <h1><FaSignInAlt /> Welcome Back</h1>
             <p>Sign in to your account</p>
           </div>
-          
+
           {/* Demo Login Buttons */}
           <div className="demo-login-section">
             <p className="demo-label">Quick Demo Login:</p>
             <div className="demo-buttons">
-              <button 
+              <button
                 className="demo-btn user"
                 onClick={() => handleDemoLogin('user')}
                 disabled={isLoading}
               >
                 <FaUser /> User
               </button>
-              <button 
+              <button
                 className="demo-btn driver"
                 onClick={() => handleDemoLogin('driver')}
                 disabled={isLoading}
               >
                 <FaTaxi /> Driver
               </button>
-              <button 
+              <button
                 className="demo-btn admin"
                 onClick={() => handleDemoLogin('admin')}
                 disabled={isLoading}
@@ -145,7 +159,7 @@ const LoginPage = () => {
               </button>
             </div>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <label className="form-label">
@@ -162,7 +176,7 @@ const LoginPage = () => {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">
                 <FaLock /> Password
@@ -178,13 +192,13 @@ const LoginPage = () => {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Login as</label>
               <div className="user-type-selector">
                 {['user', 'driver', 'admin'].map(type => (
-                  <label 
-                    key={type} 
+                  <label
+                    key={type}
                     className={`user-type-option ${formData.userType === type ? 'selected' : ''}`}
                   >
                     <input
@@ -206,15 +220,15 @@ const LoginPage = () => {
                 ))}
               </div>
             </div>
-            
+
             {error && (
               <div className="error-message">
                 <FaExclamationCircle /> {error}
               </div>
             )}
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               className="btn btn-primary login-btn"
               disabled={isLoading}
             >
@@ -229,7 +243,7 @@ const LoginPage = () => {
               )}
             </button>
           </form>
-          
+
           <div className="login-footer">
             <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
             <p>

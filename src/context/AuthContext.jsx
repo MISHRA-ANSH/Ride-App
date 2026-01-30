@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useUser } from './UserContext';
 import { useDriver } from './DriverContext';
 
@@ -9,37 +9,84 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const { currentUser, login: loginUser, logout: logoutUser } = useUser();
   const { currentDriver, loginDriver, logoutDriver } = useDriver();
-  
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const [authState, setAuthState] = useState({
+    isAuthenticated: false,
+    userType: null,
+    user: null,
+    name: null
+  });
   const [authLoading, setAuthLoading] = useState(false);
+
+  // Update auth state when user or driver changes
+  useEffect(() => {
+    if (currentUser) {
+      setAuthState({
+        isAuthenticated: true,
+        userType: 'user',
+        user: currentUser,
+        name: currentUser.name
+      });
+    } else if (currentDriver) {
+      setAuthState({
+        isAuthenticated: true,
+        userType: 'driver',
+        user: currentDriver,
+        name: currentDriver.name
+      });
+    } else {
+      setAuthState({
+        isAuthenticated: false,
+        userType: null,
+        user: null,
+        name: null
+      });
+    }
+  }, [currentUser, currentDriver]);
 
   // Combined login function
   const login = async (email, password, userType) => {
     setAuthLoading(true);
-    
+
     try {
+      // Small delay to ensure state updates properly
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       if (userType === 'user') {
-        loginUser(email, password);
-        setIsAuthenticated(true);
-        return { success: true, userType: 'user' };
+        const result = loginUser(email, password);
+        setAuthLoading(false);
+        if (result) {
+          return { success: true, userType: 'user' };
+        }
+        return { success: false, error: 'Invalid email or password' };
       } else if (userType === 'driver') {
-        loginDriver(email, password);
-        setIsAuthenticated(true);
-        return { success: true, userType: 'driver' };
+        const result = loginDriver(email, password);
+        setAuthLoading(false);
+        if (result) {
+          return { success: true, userType: 'driver' };
+        }
+        return { success: false, error: 'Invalid email or password' };
       } else if (userType === 'admin') {
         // Mock admin login (for demo)
         if (email === 'admin@ridebook.com' && password === 'admin123') {
-          setIsAuthenticated(true);
+          setAuthState({
+            isAuthenticated: true,
+            userType: 'admin',
+            user: { email, name: 'Admin' },
+            name: 'Admin'
+          });
+          setAuthLoading(false);
           return { success: true, userType: 'admin' };
         }
+        setAuthLoading(false);
         return { success: false, error: 'Invalid admin credentials' };
       }
-      
+
+      setAuthLoading(false);
       return { success: false, error: 'Invalid user type' };
     } catch (error) {
-      return { success: false, error: error.message };
-    } finally {
       setAuthLoading(false);
+      return { success: false, error: error.message || 'Login failed' };
     }
   };
 
@@ -51,33 +98,12 @@ export const AuthProvider = ({ children }) => {
     if (currentDriver) {
       logoutDriver();
     }
-    setIsAuthenticated(false);
-  };
-
-  // Get current auth state
-  const getAuthState = () => {
-    if (currentUser) {
-      return {
-        isAuthenticated: true,
-        userType: 'user',
-        user: currentUser,
-        name: currentUser.name
-      };
-    } else if (currentDriver) {
-      return {
-        isAuthenticated: true,
-        userType: 'driver',
-        user: currentDriver,
-        name: currentDriver.name
-      };
-    } else {
-      return {
-        isAuthenticated: false,
-        userType: null,
-        user: null,
-        name: null
-      };
-    }
+    setAuthState({
+      isAuthenticated: false,
+      userType: null,
+      user: null,
+      name: null
+    });
   };
 
   // Check if user is authenticated
@@ -87,16 +113,15 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     // State
-    isAuthenticated,
     authLoading,
-    
+
     // Current user/driver
     currentUser,
     currentDriver,
-    
+
     // Auth state
-    authState: getAuthState(),
-    
+    authState,
+
     // Actions
     login,
     logout,

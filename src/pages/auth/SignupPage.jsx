@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
+import { toast } from 'react-toastify';
+import {
   FaUser,
   FaEnvelope,
   FaPhone,
@@ -28,7 +29,7 @@ const SignupPage = () => {
     userType: 'user',
     agreeToTerms: false
   });
-  
+
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showDriverInfo, setShowDriverInfo] = useState(false);
@@ -45,7 +46,7 @@ const SignupPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    
+
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -54,74 +55,79 @@ const SignupPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
       newErrors.phone = 'Phone number must be 10 digits';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = 'You must agree to the terms';
     }
-    
+
     return newErrors;
   };
 
   const calculatePasswordStrength = (password) => {
     if (!password) return 0;
-    
+
     let strength = 0;
     if (password.length >= 6) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
+
     return strength;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       console.log('Signup successful:', formData);
       setIsLoading(false);
-      alert(`Account created as ${formData.userType}! Redirecting to login...`);
-      navigate('/login');
+      toast.success(`🎉 Account created as ${formData.userType}! Redirecting to login...`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
     }, 1500);
   };
 
   const getUserTypeIcon = (type) => {
-    switch(type) {
+    switch (type) {
       case 'user': return <FaUser />;
       case 'driver': return <FaTaxi />;
       case 'admin': return <FaShieldAlt />;
@@ -130,10 +136,10 @@ const SignupPage = () => {
   };
 
   const passwordStrength = calculatePasswordStrength(formData.password);
-  const passwordStrengthText = 
+  const passwordStrengthText =
     passwordStrength === 0 ? 'None' :
-    passwordStrength <= 2 ? 'Weak' :
-    passwordStrength === 3 ? 'Medium' : 'Strong';
+      passwordStrength <= 2 ? 'Weak' :
+        passwordStrength === 3 ? 'Medium' : 'Strong';
 
   return (
     <div className="signup-page">
@@ -144,12 +150,12 @@ const SignupPage = () => {
               <div className="loading-spinner"></div>
             </div>
           )}
-          
+
           <div className="signup-header">
             <h1><FaUserPlus /> Create Account</h1>
             <p>Join RideBook today</p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="signup-form">
             {/* Name Field */}
             <div className="form-group">
@@ -171,7 +177,7 @@ const SignupPage = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Email Field */}
             <div className="form-group">
               <label className="form-label">
@@ -192,7 +198,7 @@ const SignupPage = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Phone Field with Country Code */}
             <div className="form-group">
               <label className="form-label">
@@ -220,7 +226,7 @@ const SignupPage = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Password Field */}
             <div className="form-group">
               <label className="form-label">
@@ -235,16 +241,15 @@ const SignupPage = () => {
                 placeholder="Create a password"
                 disabled={isLoading}
               />
-              
+
               {/* Password Strength Indicator */}
               {formData.password && (
                 <div className="password-strength">
                   {[1, 2, 3, 4].map(i => (
                     <div
                       key={i}
-                      className={`strength-bar ${
-                        i <= passwordStrength ? passwordStrengthText.toLowerCase() : ''
-                      }`}
+                      className={`strength-bar ${i <= passwordStrength ? passwordStrengthText.toLowerCase() : ''
+                        }`}
                     />
                   ))}
                   <small style={{ marginLeft: '0.5rem', color: 'var(--text-secondary)' }}>
@@ -252,14 +257,14 @@ const SignupPage = () => {
                   </small>
                 </div>
               )}
-              
+
               {errors.password && (
                 <div className="error-message">
                   <FaExclamationTriangle /> {errors.password}
                 </div>
               )}
             </div>
-            
+
             {/* Confirm Password */}
             <div className="form-group">
               <label className="form-label">
@@ -280,14 +285,14 @@ const SignupPage = () => {
                 </div>
               )}
             </div>
-            
+
             {/* User Type Selector */}
             <div className="form-group">
               <label className="form-label">Sign up as</label>
               <div className="user-type-selector">
                 {['user', 'driver', 'admin'].map(type => (
-                  <label 
-                    key={type} 
+                  <label
+                    key={type}
                     className={`user-type-option ${formData.userType === type ? 'selected' : ''}`}
                   >
                     <input
@@ -312,7 +317,7 @@ const SignupPage = () => {
                 ))}
               </div>
             </div>
-            
+
             {/* Driver Info Note */}
             {showDriverInfo && (
               <div className="driver-info-note">
@@ -325,7 +330,7 @@ const SignupPage = () => {
                 </ul>
               </div>
             )}
-            
+
             {/* Terms Checkbox */}
             <div className="terms-group">
               <input
@@ -338,7 +343,7 @@ const SignupPage = () => {
                 disabled={isLoading}
               />
               <label htmlFor="terms" className="terms-label">
-                I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>. 
+                I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
                 I understand that my data will be processed according to these policies.
               </label>
             </div>
@@ -347,10 +352,10 @@ const SignupPage = () => {
                 <FaExclamationTriangle /> {errors.agreeToTerms}
               </div>
             )}
-            
+
             {/* Submit Button */}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary signup-btn"
               disabled={isLoading}
             >
@@ -365,7 +370,7 @@ const SignupPage = () => {
               )}
             </button>
           </form>
-          
+
           <div className="signup-footer">
             <p>Already have an account? <Link to="/login">Login here</Link></p>
             <p>

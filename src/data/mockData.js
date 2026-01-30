@@ -2,7 +2,7 @@
 export const MOCK_USERS = [
   {
     id: 1,
-    name: "Rahul Sharma",
+    name: "Ansh Mishra",
     email: "rahul@example.com",
     phone: "9876543210",
     password: "password123", // In real app, this would be hashed

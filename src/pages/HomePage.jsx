@@ -40,7 +40,7 @@
 //               India's most reliable ride booking system. 
 //               Book rides as a user or accept rides as a driver.
 //             </p>
-            
+
 //             <div className="hero-buttons">
 //               <Link to="/user/book-ride" className="btn btn-primary btn-lg">
 //                 <FaCar /> Book a Ride
@@ -64,7 +64,7 @@
 //               <h3>1. Enter Locations</h3>
 //               <p>Enter pickup and drop locations. Get fare estimate instantly.</p>
 //             </div>
-            
+
 //             <div className="feature-card">
 //               <div className="feature-icon">
 //                 <FaUser />
@@ -72,7 +72,7 @@
 //               <h3>2. Driver Accepts</h3>
 //               <p>Nearby available drivers will accept your ride request.</p>
 //             </div>
-            
+
 //             <div className="feature-card">
 //               <div className="feature-icon">
 //                 <FaCar />
@@ -80,7 +80,7 @@
 //               <h3>3. Ride Starts</h3>
 //               <p>Track your ride in real-time. Know exact ETA.</p>
 //             </div>
-            
+
 //             <div className="feature-card">
 //               <div className="feature-icon">
 //                 <FaCreditCard />
@@ -107,17 +107,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
+import {
   FaCar, FaUser, FaMapMarkerAlt, FaCreditCard, FaSignInAlt, FaUserPlus, FaTaxi,
-  FaShieldAlt, FaMobileAlt, FaStar, FaCity, FaDownload, FaCheckCircle, FaUsers
+  FaShieldAlt, FaMobileAlt, FaStar, FaCity, FaDownload, FaCheckCircle, FaUsers,
+  FaMotorcycle, FaBox, FaTruck, FaTachometerAlt
 } from 'react-icons/fa';
+import { MdDirectionsCar } from 'react-icons/md';
 import './HomePage.css';
+
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { authState, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -127,17 +139,33 @@ const HomePage = () => {
         <div className="container">
           <div className="nav-content">
             <h1 className="logo">
-              <FaTaxi className="logo-icon" /> Epic RideBook
+              <FaTaxi className="logo-icon" /> RideBook
             </h1>
-            
+
             {/* Desktop Links */}
             <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
-              <Link to="/login" className="btn btn-outline">
-                <FaSignInAlt /> Login
-              </Link>
-              <Link to="/signup" className="btn btn-primary">
-                <FaUserPlus /> Sign Up
-              </Link>
+              {!authState.isAuthenticated ? (
+                <>
+                  <Link to="/login" className="btn btn-outline">
+                    <FaSignInAlt /> Login
+                  </Link>
+                  <Link to="/signup" className="btn btn-primary">
+                    <FaUserPlus /> Sign Up
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to={authState.userType === 'driver' ? '/driver/dashboard' : '/user/dashboard'}
+                    className="btn btn-primary"
+                  >
+                    <FaUser /> Dashboard
+                  </Link>
+                  <button onClick={handleLogout} className="btn btn-outline">
+                    Sign Out
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Hamburger Button */}
@@ -156,17 +184,33 @@ const HomePage = () => {
           <div className="hero-content">
             <h1>Book Rides, Earn Money</h1>
             <p className="hero-subtitle">
-              India's most reliable ride booking system across 200+ cities. 
+              India's most reliable ride booking system across 200+ cities.
               Book rides as a user or accept rides as a driver.
             </p>
-            
+
             <div className="hero-buttons">
-              <Link to="/user/book-ride" className="btn btn-primary btn-lg">
-                <FaCar /> Book a Ride
-              </Link>
-              <Link to="/driver/dashboard" className="btn btn-secondary btn-lg">
-                <FaUser /> Drive with Us
-              </Link>
+              {!authState.isAuthenticated ? (
+                <>
+                  <Link to="/login?type=user" className="btn btn-primary btn-lg">
+                    <FaCar /> Book a Ride
+                  </Link>
+                  <Link to="/login?type=driver" className="btn btn-secondary btn-lg">
+                    <FaTaxi /> Drive with Us
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {authState.userType === 'driver' ? (
+                    <Link to="/driver/dashboard" className="btn btn-primary btn-lg">
+                      <FaTachometerAlt /> Go to Dashboard
+                    </Link>
+                  ) : (
+                    <Link to="/user/book-ride" className="btn btn-primary btn-lg">
+                      <FaCar /> Book a Ride
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -212,7 +256,7 @@ const HomePage = () => {
               <h3>1. Enter Locations</h3>
               <p>Enter pickup and drop locations. Get fare estimate instantly.</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">
                 <FaUser />
@@ -220,7 +264,7 @@ const HomePage = () => {
               <h3>2. Driver Accepts</h3>
               <p>Nearby available drivers will accept your ride request.</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">
                 <FaCar />
@@ -228,13 +272,46 @@ const HomePage = () => {
               <h3>3. Ride Starts</h3>
               <p>Track your ride in real-time. Know exact ETA.</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">
                 <FaCreditCard />
               </div>
               <h3>4. Pay & Rate</h3>
               <p>Pay securely after ride completion. Rate your experience.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="services-section">
+        <div className="container">
+          <h2 className="section-title">Our Services</h2>
+          <div className="services-grid">
+            <div className="service-card">
+              <div className="service-icon bike">
+                <FaMotorcycle />
+              </div>
+              <h4>Bike</h4>
+            </div>
+            <div className="service-card">
+              <div className="service-icon auto">
+                <FaTaxi />
+              </div>
+              <h4>Auto</h4>
+            </div>
+            <div className="service-card">
+              <div className="service-icon cab-economy">
+                <FaCar />
+              </div>
+              <h4>Cab Economy</h4>
+            </div>
+            <div className="service-card">
+              <div className="service-icon cab-premium">
+                <MdDirectionsCar />
+              </div>
+              <h4>Cab Premium</h4>
             </div>
           </div>
         </div>
@@ -259,6 +336,11 @@ const HomePage = () => {
               <FaUsers className="safety-icon" />
               <h4>Share Trip</h4>
               <p>Share live location with family.</p>
+            </div>
+            <div className="safety-feature">
+              <FaTachometerAlt className="safety-icon" />
+              <h4>24/7 Support</h4>
+              <p>Dedicated support team for you.</p>
             </div>
           </div>
         </div>
@@ -290,6 +372,28 @@ const HomePage = () => {
               </div>
               <p>"Easy booking and great earnings as a driver."</p>
               <h5>- Raj K., Mumbai</h5>
+            </div>
+            <div className="testimonial-card">
+              <div className="stars">
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+              </div>
+              <p>"The safety features make me feel very secure."</p>
+              <h5>- Anjali M., Bangalore</h5>
+            </div>
+            <div className="testimonial-card">
+              <div className="stars">
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+                <FaStar className="star-icon" />
+              </div>
+              <p>"Best app for daily commute. Highly recommended!"</p>
+              <h5>- Vikram R., Hyderabad</h5>
             </div>
           </div>
         </div>

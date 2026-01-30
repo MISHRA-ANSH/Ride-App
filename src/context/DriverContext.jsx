@@ -16,33 +16,33 @@ const initialState = {
 // Reducer Function
 const driverReducer = (state, action) => {
   switch (action.type) {
-    
+
     // Login driver
     case 'LOGIN_DRIVER': {
       const { email, password } = action.payload;
-      
+
       // Find driver (mock authentication)
-      const driver = state.drivers.find(d => 
+      const driver = state.drivers.find(d =>
         d.email === email && d.password === password
       );
-      
+
       if (!driver) {
         return {
           ...state,
           error: 'Invalid email or password'
         };
       }
-      
+
       // Don't store password in state
       const { password: _, ...driverWithoutPassword } = driver;
-      
+
       return {
         ...state,
         currentDriver: driverWithoutPassword,
         error: null
       };
     }
-    
+
     // Logout driver
     case 'LOGOUT_DRIVER': {
       return {
@@ -50,102 +50,102 @@ const driverReducer = (state, action) => {
         currentDriver: null
       };
     }
-    
+
     // Update driver status (available, busy, offline)
     case 'UPDATE_DRIVER_STATUS': {
       const { status } = action.payload;
-      
+
       if (!state.currentDriver) return state;
-      
+
       const updatedDriver = {
         ...state.currentDriver,
         status
       };
-      
-      const updatedDrivers = state.drivers.map(driver => 
+
+      const updatedDrivers = state.drivers.map(driver =>
         driver.id === updatedDriver.id ? updatedDriver : driver
       );
-      
+
       return {
         ...state,
         currentDriver: updatedDriver,
         drivers: updatedDrivers
       };
     }
-    
+
     // Update driver location
     case 'UPDATE_DRIVER_LOCATION': {
       const { location } = action.payload;
-      
+
       if (!state.currentDriver) return state;
-      
+
       const updatedDriver = {
         ...state.currentDriver,
         currentLocation: location
       };
-      
-      const updatedDrivers = state.drivers.map(driver => 
+
+      const updatedDrivers = state.drivers.map(driver =>
         driver.id === updatedDriver.id ? updatedDriver : driver
       );
-      
+
       return {
         ...state,
         currentDriver: updatedDriver,
         drivers: updatedDrivers
       };
     }
-    
+
     // Update driver earnings
     case 'UPDATE_DRIVER_EARNINGS': {
       const { amount } = action.payload;
-      
+
       if (!state.currentDriver) return state;
-      
+
       const updatedDriver = {
         ...state.currentDriver,
         totalEarnings: state.currentDriver.totalEarnings + amount,
         totalRides: state.currentDriver.totalRides + 1
       };
-      
-      const updatedDrivers = state.drivers.map(driver => 
+
+      const updatedDrivers = state.drivers.map(driver =>
         driver.id === updatedDriver.id ? updatedDriver : driver
       );
-      
+
       return {
         ...state,
         currentDriver: updatedDriver,
         drivers: updatedDrivers
       };
     }
-    
+
     // Update driver rating
     case 'UPDATE_DRIVER_RATING': {
       const { newRating } = action.payload;
-      
+
       if (!state.currentDriver) return state;
-      
+
       const currentRating = state.currentDriver.rating || 0;
       const totalRides = state.currentDriver.totalRides;
-      
+
       // Calculate new average rating
       const newAverage = ((currentRating * totalRides) + newRating) / (totalRides + 1);
-      
+
       const updatedDriver = {
         ...state.currentDriver,
         rating: parseFloat(newAverage.toFixed(1))
       };
-      
-      const updatedDrivers = state.drivers.map(driver => 
+
+      const updatedDrivers = state.drivers.map(driver =>
         driver.id === updatedDriver.id ? updatedDriver : driver
       );
-      
+
       return {
         ...state,
         currentDriver: updatedDriver,
         drivers: updatedDrivers
       };
     }
-    
+
     // Register new driver
     case 'REGISTER_DRIVER': {
       const newDriver = {
@@ -159,32 +159,32 @@ const driverReducer = (state, action) => {
         isVerified: false,
         profileImage: null
       };
-      
+
       return {
         ...state,
         drivers: [...state.drivers, newDriver],
         currentDriver: newDriver
       };
     }
-    
+
     // Update driver profile
     case 'UPDATE_DRIVER_PROFILE': {
       const updatedDriver = {
         ...state.currentDriver,
         ...action.payload
       };
-      
-      const updatedDrivers = state.drivers.map(driver => 
+
+      const updatedDrivers = state.drivers.map(driver =>
         driver.id === updatedDriver.id ? updatedDriver : driver
       );
-      
+
       return {
         ...state,
         currentDriver: updatedDriver,
         drivers: updatedDrivers
       };
     }
-    
+
     // Set loading state
     case 'SET_LOADING': {
       return {
@@ -192,7 +192,7 @@ const driverReducer = (state, action) => {
         isLoading: action.payload
       };
     }
-    
+
     // Set error
     case 'SET_ERROR': {
       return {
@@ -201,7 +201,7 @@ const driverReducer = (state, action) => {
         isLoading: false
       };
     }
-    
+
     // Clear error
     case 'CLEAR_ERROR': {
       return {
@@ -209,7 +209,7 @@ const driverReducer = (state, action) => {
         error: null
       };
     }
-    
+
     // Load drivers from localStorage
     case 'LOAD_DRIVERS': {
       return {
@@ -217,7 +217,7 @@ const driverReducer = (state, action) => {
         drivers: action.payload || state.drivers
       };
     }
-    
+
     default:
       return state;
   }
@@ -232,11 +232,11 @@ export const DriverProvider = ({ children }) => {
     try {
       const savedDrivers = localStorage.getItem('ridebook_drivers');
       const savedCurrentDriver = localStorage.getItem('ridebook_currentDriver');
-      
+
       if (savedDrivers) {
         dispatch({ type: 'LOAD_DRIVERS', payload: JSON.parse(savedDrivers) });
       }
-      
+
       if (savedCurrentDriver) {
         dispatch({ type: 'LOGIN_DRIVER', payload: JSON.parse(savedCurrentDriver) });
       }
@@ -261,7 +261,18 @@ export const DriverProvider = ({ children }) => {
 
   // Action Creators
   const loginDriver = (email, password) => {
+    // Find driver (mock authentication)
+    const driver = state.drivers.find(d =>
+      d.email === email && d.password === password
+    );
+
+    if (!driver) {
+      return false; // Login failed
+    }
+
+    // Login successful - update state
     dispatch({ type: 'LOGIN_DRIVER', payload: { email, password } });
+    return true; // Login successful
   };
 
   const logoutDriver = () => {
@@ -330,7 +341,7 @@ export const DriverProvider = ({ children }) => {
     drivers: state.drivers,
     isLoading: state.isLoading,
     error: state.error,
-    
+
     // Actions
     loginDriver,
     logoutDriver,
@@ -343,7 +354,7 @@ export const DriverProvider = ({ children }) => {
     setLoading,
     setError,
     clearError,
-    
+
     // Getters
     getDriverById,
     getAvailableDrivers,

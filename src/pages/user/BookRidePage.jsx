@@ -1,5 +1,6 @@
 // src/pages/user/BookRidePage.jsx
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { FaMapMarkerAlt, FaCar, FaRupeeSign } from 'react-icons/fa';
 import './BookRidePage.css';
 
@@ -20,23 +21,26 @@ const BookRidePage = () => {
     const perKm = 12;
     const distance = 15; // Mock distance
     let fare = baseFare + (distance * perKm);
-    
+
     // Ride type multiplier
     const multipliers = {
       auto: 0.8,
       sedan: 1,
       suv: 1.5
     };
-    
+
     fare *= multipliers[formData.rideType] || 1;
     fare = Math.max(fare, 50); // Minimum fare
-    
+
     return Math.round(fare);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Ride booked from ${formData.pickup} to ${formData.drop}! Fare: ₹${calculateFare()}`);
+    toast.success(`🚗 Ride booked from ${formData.pickup} to ${formData.drop}! Fare: ₹${calculateFare()}`, {
+      position: "top-center",
+      autoClose: 4000,
+    });
   };
 
   return (
@@ -45,7 +49,7 @@ const BookRidePage = () => {
         <h1 className="page-title">
           <FaCar /> Book a Ride
         </h1>
-        
+
         <div className="book-ride-card">
           <form onSubmit={handleSubmit} className="ride-form">
             <div className="form-group">
@@ -62,7 +66,7 @@ const BookRidePage = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">
                 <FaMapMarkerAlt /> Destination
@@ -77,7 +81,7 @@ const BookRidePage = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Ride Type</label>
               <div className="ride-type-selector">
@@ -93,7 +97,7 @@ const BookRidePage = () => {
                   <span>Auto</span>
                   <small>80% of fare</small>
                 </label>
-                
+
                 <label className={`ride-type-option ${formData.rideType === 'sedan' ? 'selected' : ''}`}>
                   <input
                     type="radio"
@@ -106,7 +110,7 @@ const BookRidePage = () => {
                   <span>Sedan</span>
                   <small>Standard</small>
                 </label>
-                
+
                 <label className={`ride-type-option ${formData.rideType === 'suv' ? 'selected' : ''}`}>
                   <input
                     type="radio"
@@ -121,14 +125,14 @@ const BookRidePage = () => {
                 </label>
               </div>
             </div>
-            
+
             <div className="fare-estimate">
               <h3>
                 <FaRupeeSign /> Estimated Fare: ₹{calculateFare()}
               </h3>
               <p>Base fare: ₹30 + ₹12/km</p>
             </div>
-            
+
             <button type="submit" className="btn btn-primary book-btn">
               Book Ride Now
             </button>

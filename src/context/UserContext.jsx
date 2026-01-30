@@ -1,11 +1,8 @@
-// src/context/UserContext.jsx
 import React, { createContext, useReducer, useContext, useEffect } from 'react';
 import { MOCK_USERS } from '../data/mockData';
 
-// Create Context
 const UserContext = createContext();
 
-// Initial State
 const initialState = {
   currentUser: null,
   users: MOCK_USERS,
@@ -13,36 +10,32 @@ const initialState = {
   error: null
 };
 
-// Reducer Function
 const userReducer = (state, action) => {
   switch (action.type) {
-    
-    // Login user
+
     case 'LOGIN': {
       const { email, password } = action.payload;
-      
-      // Find user (mock authentication)
-      const user = state.users.find(u => 
+
+      const user = state.users.find(u =>
         u.email === email && u.password === password
       );
-      
+
       if (!user) {
         return {
           ...state,
           error: 'Invalid email or password'
         };
       }
-      
-      // Don't store password in state
+
       const { password: _, ...userWithoutPassword } = user;
-      
+
       return {
         ...state,
         currentUser: userWithoutPassword,
         error: null
       };
     }
-    
+
     // Logout user
     case 'LOGOUT': {
       return {
@@ -50,7 +43,7 @@ const userReducer = (state, action) => {
         currentUser: null
       };
     }
-    
+
     // Register new user
     case 'REGISTER': {
       const newUser = {
@@ -62,106 +55,106 @@ const userReducer = (state, action) => {
         averageRating: null,
         profileImage: null
       };
-      
+
       return {
         ...state,
         users: [...state.users, newUser],
         currentUser: newUser
       };
     }
-    
+
     // Update user profile
     case 'UPDATE_PROFILE': {
       const updatedUser = {
         ...state.currentUser,
         ...action.payload
       };
-      
-      const updatedUsers = state.users.map(user => 
+
+      const updatedUsers = state.users.map(user =>
         user.id === updatedUser.id ? updatedUser : user
       );
-      
+
       return {
         ...state,
         currentUser: updatedUser,
         users: updatedUsers
       };
     }
-    
+
     // Update wallet balance
     case 'UPDATE_WALLET': {
       const { amount, type } = action.payload; // type: 'add' or 'deduct'
-      
+
       if (!state.currentUser) return state;
-      
-      const newBalance = type === 'add' 
+
+      const newBalance = type === 'add'
         ? state.currentUser.walletBalance + amount
         : state.currentUser.walletBalance - amount;
-      
+
       const updatedUser = {
         ...state.currentUser,
         walletBalance: newBalance
       };
-      
-      const updatedUsers = state.users.map(user => 
+
+      const updatedUsers = state.users.map(user =>
         user.id === updatedUser.id ? updatedUser : user
       );
-      
+
       return {
         ...state,
         currentUser: updatedUser,
         users: updatedUsers
       };
     }
-    
+
     // Add ride to user's history
     case 'ADD_USER_RIDE': {
       if (!state.currentUser) return state;
-      
+
       const updatedUser = {
         ...state.currentUser,
         totalRides: state.currentUser.totalRides + 1
       };
-      
-      const updatedUsers = state.users.map(user => 
+
+      const updatedUsers = state.users.map(user =>
         user.id === updatedUser.id ? updatedUser : user
       );
-      
+
       return {
         ...state,
         currentUser: updatedUser,
         users: updatedUsers
       };
     }
-    
+
     // Update user rating
     case 'UPDATE_USER_RATING': {
       const { newRating } = action.payload;
-      
+
       if (!state.currentUser) return state;
-      
+
       const currentRating = state.currentUser.averageRating || 0;
       const totalRides = state.currentUser.totalRides;
-      
+
       // Calculate new average rating
       const newAverage = ((currentRating * totalRides) + newRating) / (totalRides + 1);
-      
+
       const updatedUser = {
         ...state.currentUser,
         averageRating: parseFloat(newAverage.toFixed(1))
       };
-      
-      const updatedUsers = state.users.map(user => 
+
+      const updatedUsers = state.users.map(user =>
         user.id === updatedUser.id ? updatedUser : user
       );
-      
+
       return {
         ...state,
         currentUser: updatedUser,
         users: updatedUsers
       };
     }
-    
+
     // Set loading state
     case 'SET_LOADING': {
       return {
@@ -169,7 +162,7 @@ const userReducer = (state, action) => {
         isLoading: action.payload
       };
     }
-    
+
     // Set error
     case 'SET_ERROR': {
       return {
@@ -178,7 +171,7 @@ const userReducer = (state, action) => {
         isLoading: false
       };
     }
-    
+
     // Clear error
     case 'CLEAR_ERROR': {
       return {
@@ -186,7 +179,7 @@ const userReducer = (state, action) => {
         error: null
       };
     }
-    
+
     // Load users from localStorage
     case 'LOAD_USERS': {
       return {
@@ -194,7 +187,7 @@ const userReducer = (state, action) => {
         users: action.payload || state.users
       };
     }
-    
+
     default:
       return state;
   }
@@ -209,11 +202,11 @@ export const UserProvider = ({ children }) => {
     try {
       const savedUsers = localStorage.getItem('ridebook_users');
       const savedCurrentUser = localStorage.getItem('ridebook_currentUser');
-      
+
       if (savedUsers) {
         dispatch({ type: 'LOAD_USERS', payload: JSON.parse(savedUsers) });
       }
-      
+
       if (savedCurrentUser) {
         // In real app, you would verify token/session here
         dispatch({ type: 'LOGIN', payload: JSON.parse(savedCurrentUser) });
@@ -239,7 +232,18 @@ export const UserProvider = ({ children }) => {
 
   // Action Creators
   const login = (email, password) => {
+    // Find user (mock authentication)
+    const user = state.users.find(u =>
+      u.email === email && u.password === password
+    );
+
+    if (!user) {
+      return false; // Login failed
+    }
+
+    // Login successful - update state
     dispatch({ type: 'LOGIN', payload: { email, password } });
+    return true; // Login successful
   };
 
   const logout = () => {
@@ -294,7 +298,7 @@ export const UserProvider = ({ children }) => {
     users: state.users,
     isLoading: state.isLoading,
     error: state.error,
-    
+
     // Actions
     login,
     logout,
@@ -306,7 +310,7 @@ export const UserProvider = ({ children }) => {
     setLoading,
     setError,
     clearError,
-    
+
     // Getters
     getUserById,
     getAllUsers

@@ -1,7 +1,8 @@
 // src/components/common/Header.jsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
+import { toast } from 'react-toastify';
+import {
   FaTaxi,
   FaHome,
   FaSignInAlt,
@@ -13,13 +14,20 @@ import {
   FaMoneyCheckAlt,
   FaSignOutAlt
 } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 const Header = ({ userType = 'guest', userName = '' }) => {
   const navigate = useNavigate();
 
+  const { logout } = useAuth();
+
   const handleLogout = () => {
-    alert('Logged out successfully!');
+    logout();
+    toast.success('Logged out successfully!', {
+      position: "top-right",
+      autoClose: 2000,
+    });
     navigate('/');
   };
 
@@ -30,7 +38,7 @@ const Header = ({ userType = 'guest', userName = '' }) => {
           {/* Logo */}
           <div className="header-logo">
             <Link to="/" className="logo-link">
-              <FaTaxi className="logo-icon" /> 
+              <FaTaxi className="logo-icon" />
               <span>RideBook</span>
             </Link>
           </div>
